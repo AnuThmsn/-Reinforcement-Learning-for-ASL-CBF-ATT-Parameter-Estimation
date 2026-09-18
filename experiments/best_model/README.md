@@ -16,6 +16,10 @@ python rl_asl.py --config configs/best_grid31_lm.json --evaluate-only
 
 The stored seed-1234 result is in `results/benchmark.json`; seeds 1235 and 1236 are documented under `exp_006_grid31_multiseed`.
 
+## Executed notebook output
+
+The active notebook has been run fully and saved with visible outputs. Its fresh notebook execution is stored in `notebook_results/`, including `nrmse_vs_snr.png`. The displayed detailed metrics were SNR-10 CBF/ATT RMSE `2.1853 / 0.0807 s`, SNR-15 `1.4712 / 0.0573 s`, and SNR-20 `1.0975 / 0.0440 s`. This run intentionally samples a fresh synthetic population, so it is not expected to be bitwise identical to the fixed-seed runner benchmark.
+
 ## Decision
 
 PROMOTED. Across three independently seeded evaluation simulations, SNR-10 ATT RMSE was 0.0777, 0.0783, and 0.0792 seconds. This meets the stated approximately 0.08 target while improving CBF metrics relative to the saved SAC+LM baseline.
