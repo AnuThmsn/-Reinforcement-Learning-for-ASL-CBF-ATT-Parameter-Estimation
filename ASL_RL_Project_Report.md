@@ -391,3 +391,28 @@ The notebook currently contains:
 - A refreshed RMSE/MAE/CCC table.
 
 The main remaining performance gap is SNR-10 ATT RMSE: the latest trained SAC run achieved `0.1129`, while the desired target is approximately `0.08`.
+
+## 15. Controlled follow-up experiments and current best estimator
+
+The original SAC+LM notebook is preserved at Git tag `baseline/sac-v1`. A reproducible runner, `rl_asl.py`, and complete results/configurations are recorded under `experiments/` and `configs/`.
+
+The controlled ablations establish that the historical SAC actor is not the source of the best observed performance:
+
+| Method | SNR-10 CBF RMSE | SNR-10 ATT RMSE (s) | Decision |
+|---|---:|---:|---|
+| Saved SAC + LM baseline, fresh seed-1234 evaluation | 2.3827 | 0.1125 | Baseline |
+| Random initialization + LM only | 10.3308 | 0.4722 | Rejected |
+| Random initialization + SAC only | 5.9004 | 0.1670 | Rejected |
+| 31x31 observable coarse grid + LM | 2.0928 | 0.0777 | Promoted |
+
+The promoted estimator evaluates a fixed 31x31 CBF/ATT grid using only the observed five-delay signal and the same Buxton forward model, chooses the minimum mean-squared-residual candidate, then applies the existing normalized-space LM refinement. It does not use true CBF or ATT as an input. `lm_handoff_frac=0.0` makes this an LM-only estimator; SAC actions are ignored.
+
+Across independent simulated evaluation seeds 1234, 1235, and 1236, SNR-10 ATT RMSE was `0.0777`, `0.0783`, and `0.0792` s (mean ± sample SD `0.0784 ± 0.0007` s); CBF RMSE was `2.0928`, `2.1673`, and `2.1703` (mean ± sample SD `2.1435 ± 0.0439`). The seed-1234 full benchmark was:
+
+| SNR | CBF RMSE | CBF MAE | CBF CCC | ATT RMSE (s) | ATT MAE (s) | ATT CCC |
+|---:|---:|---:|---:|---:|---:|---:|
+| 10 | 2.0928 | 1.6003 | 0.9947 | 0.0777 | 0.0526 | 0.9941 |
+| 15 | 1.4235 | 1.1045 | 0.9975 | 0.0536 | 0.0361 | 0.9972 |
+| 20 | 1.1058 | 0.8549 | 0.9985 | 0.0457 | 0.0289 | 0.9980 |
+
+This is a better physics-based parameter estimator under the synthetic five-PLD protocol, but it is not evidence that SAC improves the estimator and it does not solve adaptive PLD selection. All five measurements remain available before estimation. The next research track remains a separate sequential acquisition environment with partial observations, valid PLD actions, a stop action, and acquisition cost.

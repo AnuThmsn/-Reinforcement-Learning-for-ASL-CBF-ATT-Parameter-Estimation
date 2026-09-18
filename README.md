@@ -5,8 +5,10 @@ This repository contains a Soft Actor-Critic (SAC) reinforcement-learning implem
 ## Contents
 
 - `rl-asl (6).ipynb`: complete physics-informed SAC notebook.
+- `rl_asl.py`: reproducible experiment runner and current best validated estimator.
 - `ASL_RL_Project_Report.md`: architecture, implementation details, results, errors, corrections, and reproducibility notes.
 - `sac_asl_out/`: training log, SNR sweep plot, final model checkpoint, and periodic checkpoints.
+- `configs/` and `experiments/`: immutable configuration files and measured experiment history.
 
 ## Run
 
@@ -17,6 +19,18 @@ This repository contains a Soft Actor-Critic (SAC) reinforcement-learning implem
 5. Run the SNR sweep and detailed metrics cells.
 
 The notebook writes outputs to `sac_asl_out/` relative to the current working directory.
+
+## Current best validated estimator
+
+The active best estimator is an observable 31x31 CBF/ATT forward-model grid initializer followed by the existing Levenberg-Marquardt refinement. It improves the fixed-five-PLD synthetic SNR-10 ATT RMSE to approximately `0.0784 ± 0.0007` seconds across three evaluation seeds. It is intentionally an LM-only ablation: the experiments show that the saved SAC policy is not responsible for this gain.
+
+Reproduce the seed-1234 benchmark:
+
+```powershell
+python rl_asl.py --config configs/best_grid31_lm.json --evaluate-only
+```
+
+This remains a parameter-estimation result using all five measurements; it is not an adaptive PLD-selection result.
 
 ## Current benchmark output
 
