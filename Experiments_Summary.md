@@ -63,3 +63,4 @@ Across the evolution of these experiments, our architecture matured into the fol
 1. **Procedural Generation:** The environment (`ASLEnvironment`) simulates millions of theoretical human brains using the Buxton kinetic model, injecting Rician noise at runtime. This makes data-overfitting impossible.
 2. **SAC Agent (Phase 1):** A Twin-Delayed Actor-Critic network reads the noisy signal and rapidly steps the CBF/ATT estimates toward the true value.
 3. **LM Refinement (Phase 2):** A differentiable physics solver takes over for the final few steps to hone the precision mathematically, resulting in the final NIfTI output maps.
+

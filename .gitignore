@@ -1,3 +1,10 @@
 __pycache__/
 *.pyc
 .jupyter-config/
+
+test data/
+rl_inference_output/
+diagnostic_output/
+*.nii
+*.nii.gz
+*.pth

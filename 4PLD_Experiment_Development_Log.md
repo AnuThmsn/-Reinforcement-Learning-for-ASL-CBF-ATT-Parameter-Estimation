@@ -44,3 +44,4 @@ The notebook is now guaranteed to work flawlessly from top to bottom. It will co
 
 ## 5. Conclusion
 Reducing the acquisition protocol from 5 PLDs to 4 PLDs incurs a heavy penalty in estimation accuracy, proving the necessity of the long-delay bolus. Furthermore, decoupling the RL agent from the evaluation pipeline in the notebook requires careful propagation of configuration arguments (`init_mode`, `lm_handoff_frac`), or it risks defaulting to untrained random behavior.
+
