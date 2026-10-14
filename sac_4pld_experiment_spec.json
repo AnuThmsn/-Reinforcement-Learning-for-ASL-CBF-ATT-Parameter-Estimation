@@ -1,0 +1,39 @@
+{
+  "experiment_name": "SAC_4PLD_Baseline",
+  "objective": "Controlled parameter-estimation experiment to match the DNN 4-PLD setup.",
+  "acquisition": {
+    "num_plds": 4,
+    "pld_sec": [1.525, 2.025, 2.525, 3.025],
+    "ld_sec": [1.8, 1.8, 1.8, 1.8]
+  },
+  "physics": {
+    "forward_model": "Buxton single-compartment",
+    "alpha": 0.85,
+    "beta": 0.75,
+    "lambda_blood": 0.9,
+    "T1_tissue": 1.2,
+    "T1_blood": 1.66,
+    "signal_scale": 100000.0,
+    "cbf_range": [0.0, 100.0],
+    "att_range": [500.0, 3000.0]
+  },
+  "sac_architecture": {
+    "state_dim": 11,
+    "state_representation": "4 obs_signal + 4 pred_signal + 1 norm_cbf + 1 norm_att + 1 time_fraction",
+    "action_dim": 2,
+    "action_representation": "continuous tanh deltas for [d_cbf, d_att]",
+    "actor": "GaussianPolicy with twin critics",
+    "hidden_dim": 256,
+    "reward": "Negative NRMSE of reconstructed signal vs observed signal",
+    "initialization": "coarse_grid"
+  },
+  "training": {
+    "iterations": 1000,
+    "batch_envs": 256,
+    "max_steps": 12,
+    "snr_min": 2.0,
+    "snr_max": 20.0,
+    "noise_model": "Rician"
+  }
+}
+

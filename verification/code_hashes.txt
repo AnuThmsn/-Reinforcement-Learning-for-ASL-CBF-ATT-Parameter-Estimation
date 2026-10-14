@@ -1,0 +1,6 @@
+script: 2f0ab9e771005d9c0f3a73dc818d23ffe33288649088ce7501a3f33ba3a90c34
+config: fbcd63087824d3dcd1cd823dc4d6f3f208509301546c91deb9c9498f2ca5596c
+sac_asl_it500.pth: 255dc2ffdfed2c729edf2f903141328953be8d1ea18cba53c598ba14267896e2
+sac_asl_4pld_final.pth: 255dc2ffdfed2c729edf2f903141328953be8d1ea18cba53c598ba14267896e2
+
+NOTE: final checkpoint is merely a copy of iteration-500 checkpoint

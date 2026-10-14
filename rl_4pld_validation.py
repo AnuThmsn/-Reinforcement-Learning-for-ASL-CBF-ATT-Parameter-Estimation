@@ -59,7 +59,7 @@ class InferenceOnly4PLD:
         self.ref_signal = float(
             buxton_signal(
                 torch.tensor([[50.0]], device=self.device),
-                torch.tensor([[1600.0]], device=self.device),
+                torch.tensor([[1.6]], device=self.device),
                 torch.tensor([2.0], device=self.device),
                 torch.tensor([1.8], device=self.device),
             ).abs().item()
@@ -114,7 +114,7 @@ class InferenceOnly4PLD:
         action = action.clamp(-1.0, 1.0)
         decay = 1.0 - 0.5 * self.step_count / float(self.max_steps)
         self.cbf_est = (self.cbf_est + action[:, 0] * 10.0 * decay).clamp(CBF_MIN, CBF_MAX)
-        self.att_est = (self.att_est + action[:, 1] * 300.0 * decay).clamp(ATT_MIN, ATT_MAX)
+        self.att_est = (self.att_est + action[:, 1] * 0.3 * decay).clamp(ATT_MIN, ATT_MAX)
         self.step_count += 1
         return self.make_state()
 
@@ -194,7 +194,7 @@ def synthetic_signals(cbf_values, att_values, snr, device):
     clean = buxton_signal(cbf[:, None], att[:, None], PLD_SEC.to(device), LD_SEC.to(device))
     if snr == "clean":
         return cbf, att, clean
-    reference = buxton_signal(torch.tensor([[50.0]], device=device), torch.tensor([[1600.0]], device=device),
+    reference = buxton_signal(torch.tensor([[50.0]], device=device), torch.tensor([[1.6]], device=device),
                               torch.tensor([2.0], device=device), torch.tensor([1.8], device=device)).abs().item()
     sigma = reference / (RICIAN_NOISE_FACTOR * float(snr))
     nr = torch.randn_like(clean) * sigma
@@ -204,7 +204,7 @@ def synthetic_signals(cbf_values, att_values, snr, device):
 
 def run_synthetic_validation(agent, device):
     cbf_values = [20, 30, 40, 50, 60, 70, 80, 90]
-    att_values = [500, 800, 1100, 1400, 1700, 2000, 2400, 2800, 3000]
+    att_values = [0.5, 0.8, 1.1, 1.4, 1.7, 2.0, 2.4, 2.8, 3.0]
     pairs = [(cbf, att) for cbf in cbf_values for att in att_values]
     true_cbf = [p[0] for p in pairs]
     true_att = [p[1] for p in pairs]
@@ -260,7 +260,7 @@ def clinical_preprocess(data_root):
         result["status"] = "MISSING_INPUTS"
         return result, None
     result["status"] = "AMBIGUOUS_ACQUISITION_ORDER"
-    result["message"] = "Filenames do not encode the training PLD/LD table [0.700,2.033,3.366,0.700]/[1.333,1.333,1.333,4.000]; clinical maps were not inferred."
+    result["message"] = "Filenames do not encode the training PLD/LD table [1.525, 2.025, 2.525, 3.025]/[1.8, 1.8, 1.8, 1.8]; clinical maps were not inferred."
     mask_img = nib.load(mask_files[0])
     valid_mask = mask_img.get_fdata() > 0
     delta = np.stack([nib.load(p).get_fdata() for p in perf_files], axis=-1).astype(np.float32)

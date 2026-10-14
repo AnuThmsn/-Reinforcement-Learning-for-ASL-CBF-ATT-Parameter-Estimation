@@ -73,8 +73,8 @@ print("Torch:", torch.__version__, "| CUDA available:", torch.cuda.is_available(
 
 # Multi-delay bolus timings from the base paper (Ishida et al. 2023),
 # the "combined approach": (PLD [sec], LD [sec]) for boluses 1-5.
-PLD_SEC = torch.tensor([0.700, 2.033, 3.366, 0.700])
-LD_SEC = torch.tensor([1.333, 1.333, 1.333, 4.000])
+PLD_SEC = torch.tensor([1.525, 2.025, 2.525, 3.025])
+LD_SEC = torch.tensor([1.8, 1.8, 1.8, 1.8])
 N_BOLUS = 4
 
 # MRI / kinetic-model constants (3.0T), matching the base paper.
@@ -86,19 +86,19 @@ T1_BLOOD = 1.66           # sec
 SIGNAL_SCALE = 100_000.0  # ΔM/M0 (%) -> scaled signal intensity, as in the paper
 
 # Physiological ground-truth ranges used by the base paper for training.
-CBF_MIN, CBF_MAX = 20.0, 90.0        # mL/100 g/min
-ATT_MIN, ATT_MAX = 500.0, 3000.0     # msec
+CBF_MIN, CBF_MAX = 0.0, 100.0        # mL/100 g/min
+ATT_MIN, ATT_MAX = 0.5, 3.0
 
 # Reference condition used by the paper to anchor rSNR -> noise SD:
 # PLD=2000ms, LD=1800ms, CBF=50 mL/100g/min, ATT=1600ms.
 REF_PLD_SEC = 2.000
 REF_LD_SEC = 1.800
 REF_CBF = 50.0
-REF_ATT_MSEC = 1600.0
+REF_ATT_SEC = 1.6
 RICIAN_NOISE_FACTOR = 2.0
 
 
-def buxton_signal(cbf: torch.Tensor, att_msec: torch.Tensor,
+def buxton_signal(cbf: torch.Tensor, att_sec: torch.Tensor,
                    pld_sec: torch.Tensor, ld_sec: torch.Tensor) -> torch.Tensor:
     """
     Vectorized single-compartment (Buxton) kinetic model, Eq. (1) of the base paper.
@@ -110,7 +110,7 @@ def buxton_signal(cbf: torch.Tensor, att_msec: torch.Tensor,
     Returns scaled ΔM with shape [..., n_bolus].
     """
     f = cbf / 6000.0                 # mL/100g/min -> mL/g/s
-    att = att_msec / 1000.0          # msec -> sec
+    att = att_sec
 
     w = pld_sec
     tau = ld_sec
@@ -128,7 +128,7 @@ def buxton_signal(cbf: torch.Tensor, att_msec: torch.Tensor,
 def _reference_signal_scale(device) -> float:
     """Single-delay reference signal used to anchor rSNR -> noise SD."""
     cbf = torch.tensor([REF_CBF], device=device)
-    att = torch.tensor([REF_ATT_MSEC], device=device)
+    att = torch.tensor([REF_ATT_SEC], device=device)
     pld = torch.tensor([REF_PLD_SEC], device=device)
     ld = torch.tensor([REF_LD_SEC], device=device)
     sig = buxton_signal(cbf, att, pld, ld)
@@ -186,7 +186,7 @@ class ASLEnvironment:
     """
 
     STEP_CBF = 10.0    # max per-step change, mL/100 g/min (Phase 1 only)
-    STEP_ATT = 300.0   # max per-step change, msec (Phase 1 only)
+    STEP_ATT = 0.3 # (Phase 1 only)
 
     # DPAC / Levenberg-Marquardt hyperparameters
     LM_ITERS = 3            # fixed unrolled LM iterations per Phase-2 step

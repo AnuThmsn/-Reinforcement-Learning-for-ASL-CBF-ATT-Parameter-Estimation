@@ -1,0 +1,87 @@
+{
+  "protocol": {
+    "name": "Controlled ASL CBF/ATT 4-PLD Parameter Estimation Benchmark",
+    "description": "Rigorous reproducibility and model comparison benchmark across classical, supervised DNN, and reinforcement learning estimators.",
+    "date": "2026-10-14",
+    "plds_sec": [1.525, 2.025, 2.525, 3.025],
+    "lds_sec": [1.8, 1.8, 1.8, 1.8],
+    "num_plds": 4,
+    "physics": {
+      "alpha": 0.85,
+      "beta": 0.75,
+      "lambda_blood": 0.9,
+      "t1_tissue_sec": 1.2,
+      "t1_blood_sec": 1.66,
+      "signal_scale": 100000.0
+    },
+    "parameter_ranges": {
+      "cbf_min": 0.0,
+      "cbf_max": 100.0,
+      "cbf_unit": "mL/100g/min",
+      "att_min": 0.5,
+      "att_max": 3.0,
+      "att_unit": "seconds"
+    },
+    "noise_model": {
+      "type": "Rician_magnitude",
+      "rician_noise_factor": 2.0,
+      "reference_cbf": 50.0,
+      "reference_att_sec": 1.6,
+      "reference_pld_sec": 2.0,
+      "reference_ld_sec": 1.8,
+      "s_ref": 416.08392333984375,
+      "sigma_formula": "s_ref / (rician_noise_factor * snr)"
+    },
+    "evaluation": {
+      "snr_levels": [10.0, 15.0, 20.0],
+      "test_cohort_size_per_snr": 2000,
+      "test_seed": 4242,
+      "metrics": ["RMSE", "MAE", "Lin_CCC"]
+    }
+  },
+  "models": {
+    "GRID31": {
+      "family": "Classical Discrete Optimization",
+      "configuration": "31x31 coarse grid search over Buxton signal dictionary (961 forward evaluations)",
+      "is_learned": false,
+      "training_time_sec": 0.0,
+      "training_samples": 0
+    },
+    "GRID31_LM": {
+      "family": "Classical Continuous Nonlinear Least Squares",
+      "configuration": "31x31 coarse grid initialization followed by 5 Levenberg-Marquardt analytical Jacobian steps",
+      "is_learned": false,
+      "training_time_sec": 0.0,
+      "training_samples": 0
+    },
+    "DNN_BOUNDED": {
+      "family": "Supervised Deep Neural Network",
+      "configuration": "BoundedNet (4 hidden layers x 64 neurons, ELU, physical sigmoid output bounds)",
+      "is_learned": true,
+      "training_epochs": 25,
+      "batch_size": 256,
+      "training_samples": 100000,
+      "optimizer": "Adam",
+      "learning_rate": 0.001
+    },
+    "SAC_PURE": {
+      "family": "Deep Reinforcement Learning (Pure SAC)",
+      "configuration": "Soft Actor-Critic, GaussianPolicy(256x256), TwinCritic(256x256), 12 iterative steps, random init, no LM",
+      "is_learned": true,
+      "checkpoint": "experiments/rl_sac_4pld_trained/notebook_results/sac_asl_final.pth",
+      "training_iterations": 1000,
+      "training_time_sec": 1860.0,
+      "environment_transitions": 3072000
+    },
+    "SAC_LM": {
+      "family": "Hybrid Reinforcement Learning + Optimization",
+      "configuration": "SAC policy acts for steps 0-8, Levenberg-Marquardt refines steps 9-11 (lm_handoff_frac=0.8)",
+      "is_learned": true,
+      "checkpoint": "experiments/rl_sac_4pld_trained/notebook_results/sac_asl_final.pth",
+      "training_iterations": 1000,
+      "training_time_sec": 1860.0,
+      "environment_transitions": 3072000
+    }
+  }
+}
+
